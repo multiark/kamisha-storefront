@@ -11,6 +11,8 @@ import { useParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
+import VirtualTryOnButton from "../virtual-try-on"
+import SizeRecommendationButton from "../size-recommendation"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -136,6 +138,19 @@ export default function ProductActions({
               <Divider />
             </div>
           )}
+          {/* Virtual Try-On and Size Recommendation Buttons */}
+          <div className="space-y-3 mb-4">
+            <VirtualTryOnButton
+              product={product}
+              variant={selectedVariant}
+              disabled={disabled}
+            />
+            <SizeRecommendationButton
+              product={product}
+              variant={selectedVariant}
+              disabled={disabled}
+            />
+          </div>
         </div>
 
         <ProductPrice product={product} variant={selectedVariant} />
