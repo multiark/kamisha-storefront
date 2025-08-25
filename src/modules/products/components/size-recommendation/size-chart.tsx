@@ -20,7 +20,7 @@ type SizeChartData = {
 const SizeChart: React.FC<SizeChartProps> = ({ product }) => {
   const [unit, setUnit] = useState<'metric' | 'imperial'>('metric')
   
-  // Mock size chart data - in real implementation, this would come from Zakeke API
+      // Mock size chart data - in real implementation, this would come from 3DLOOK API
   const sizeChartData: SizeChartData[] = [
     { size: 'XS', chest: '86-91', waist: '71-76', hips: '91-96', length: '66', shoulders: '41', sleeves: '58' },
     { size: 'S', chest: '91-96', waist: '76-81', hips: '96-101', length: '68', shoulders: '43', sleeves: '60' },
@@ -225,3 +225,4 @@ const SizeChart: React.FC<SizeChartProps> = ({ product }) => {
 }
 
 export default SizeChart
+

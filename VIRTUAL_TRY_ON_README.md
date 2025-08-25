@@ -1,13 +1,13 @@
 # Virtual Try-On & Size Recommendation Feature
 
-This document describes the implementation of the Virtual Try-On and Size Recommendation features for the Medusa storefront using Zakeke as the service provider.
+This document describes the implementation of the Virtual Try-On and Size Recommendation features for the Medusa storefront using 3DLOOK as the service provider.
 
 ## Features Overview
 
 ### 1. Virtual Try-On
 - **Camera Integration**: Access device camera for photo capture
 - **Product Overlay**: Visualize products on user photos
-- **Image Processing**: AI-powered virtual try-on using Zakeke
+- **Image Processing**: AI-powered virtual try-on using 3DLOOK
 - **Download & Share**: Save and share try-on results
 
 ### 2. Size Recommendation
@@ -35,9 +35,9 @@ storefront/src/
 │       └── index.tsx             # Integrated with both features
 ├── lib/
 │   ├── data/
-│   │   └── zakeke.ts            # Zakeke API service
+│   │   └── 3dlook.ts            # 3DLOOK API service
 │   └── config/
-│       └── zakeke.ts            # Zakeke configuration
+│       └── 3dlook.ts            # 3DLOOK configuration
 ```
 
 ## Components
@@ -51,7 +51,7 @@ storefront/src/
 - Full-screen modal for try-on experience
 - Camera access and photo capture
 - Product preview and overlay
-- Integration with Zakeke API
+- Integration with 3DLOOK API
 
 ### Size Recommendation Button (`size-recommendation/index.tsx`)
 - Entry point for size recommendation feature
@@ -73,15 +73,15 @@ storefront/src/
 - Measurement instructions
 - Unit toggle functionality
 
-## Zakeke Integration
+## 3DLOOK Integration
 
-### Service Layer (`lib/data/zakeke.ts`)
-- API client for Zakeke services
+### Service Layer (`lib/data/3dlook.ts`)
+- API client for 3DLOOK services
 - Session management for try-on
 - Size recommendation algorithms
 - Error handling and retry logic
 
-### Configuration (`lib/config/zakeke.ts`)
+### Configuration (`lib/config/3dlook.ts`)
 - Environment variable management
 - Feature flags and UI controls
 - API endpoint configuration
@@ -92,10 +92,9 @@ storefront/src/
 Create a `.env.local` file with the following variables:
 
 ```bash
-# Zakeke API Configuration
-NEXT_PUBLIC_ZAKEKE_API_KEY=your_zakeke_api_key_here
-NEXT_PUBLIC_ZAKEKE_API_URL=https://api.zakeke.com/v2
-NEXT_PUBLIC_ZAKEKE_TENANT_ID=your_tenant_id_here
+# 3DLOOK API Configuration
+NEXT_PUBLIC_3DLOOK_API_KEY=your_3dlook_api_key_here
+NEXT_PUBLIC_3DLOOK_API_URL=https://api.3dlook.com/v1
 ```
 
 ## Installation & Setup
@@ -108,8 +107,7 @@ yarn install
 
 ### 2. Configure Environment
 - Copy environment variables to `.env.local`
-- Obtain Zakeke API credentials
-- Configure tenant ID
+- Obtain 3DLOOK API credentials
 
 ### 3. Test Features
 - Navigate to a product detail page
@@ -139,19 +137,19 @@ yarn install
 ### Virtual Try-On Flow
 ```
 1. Create Try-On Session
-   POST /try-on/sessions
+   POST /virtual-try-on
    
 2. Process Try-On
-   POST /try-on/sessions/{sessionId}/process
+   POST /virtual-try-on/{sessionId}/process
    
 3. Get Results
-   GET /try-on/sessions/{sessionId}
+   GET /virtual-try-on/{sessionId}
 ```
 
 ### Size Recommendation Flow
 ```
 1. Submit Measurements
-   POST /sizing/recommendations
+   POST /size-recommendations
    
 2. Get Size Chart
    GET /products/{productId}/size-chart
@@ -204,13 +202,13 @@ yarn test:e2e
 
 2. **API Errors**
    - Verify environment variables
-   - Check Zakeke service status
+   - Check 3DLOOK service status
    - Review API rate limits
 
 3. **Size Recommendations Inaccurate**
    - Verify measurement inputs
    - Check product size chart data
-   - Review Zakeke algorithm settings
+   - Review 3DLOOK algorithm settings
 
 ### Debug Mode
 Enable debug logging by setting:
@@ -235,7 +233,7 @@ NEXT_PUBLIC_DEBUG=true
 ## Support
 
 For technical support:
-- Check Zakeke documentation
+- Check 3DLOOK documentation
 - Review error logs in browser console
 - Contact development team
 - Submit issues to project repository
@@ -243,3 +241,5 @@ For technical support:
 ## License
 
 This implementation is part of the Medusa storefront and follows the same licensing terms.
+
+

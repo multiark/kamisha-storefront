@@ -78,18 +78,18 @@ const VirtualTryOnModal: React.FC<VirtualTryOnModalProps> = ({
     
     setIsProcessing(true)
     try {
-      // Import Zakeke service dynamically to avoid SSR issues
-      const { zakekeService } = await import("@lib/data/zakeke")
+      // Import 3DLOOK service dynamically to avoid SSR issues
+      const { threeDLookService } = await import("@lib/data/3dlook")
       
       // Create try-on session
-      const session = await zakekeService.createTryOnSession({
+      const session = await threeDLookService.createTryOnSession({
         productId: product.id!,
         variantId: variant.id!,
         userImage: capturedImage,
       })
       
       // Process the try-on
-      const result = await zakekeService.processTryOn(session.sessionId, capturedImage)
+      const result = await threeDLookService.processTryOn(session.sessionId, capturedImage)
       
       console.log("Virtual try-on completed:", result)
       // TODO: Display the result image

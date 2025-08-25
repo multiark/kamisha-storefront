@@ -13,6 +13,7 @@ import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
 import VirtualTryOnButton from "../virtual-try-on"
 import SizeRecommendationButton from "../size-recommendation"
+import GetMeasuredButton from "../get-measured";
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -140,16 +141,17 @@ export default function ProductActions({
           )}
           {/* Virtual Try-On and Size Recommendation Buttons */}
           <div className="space-y-3 mb-4">
-            <VirtualTryOnButton
+            {/* <VirtualTryOnButton
               product={product}
               variant={selectedVariant}
               disabled={disabled}
-            />
+            /> */}
             <SizeRecommendationButton
               product={product}
               variant={selectedVariant}
               disabled={disabled}
             />
+            <GetMeasuredButton />
           </div>
         </div>
 

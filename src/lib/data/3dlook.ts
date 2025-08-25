@@ -1,16 +1,16 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
+import { THREEDLOOK_CONFIG } from "@lib/config/3dlook"
 
-// Zakeke API configuration
-const ZAKEKE_CONFIG = {
-  apiKey: process.env.NEXT_PUBLIC_ZAKEKE_API_KEY || '',
-  baseUrl: process.env.NEXT_PUBLIC_ZAKEKE_API_URL || 'https://api.zakeke.com/v2',
-  tenantId: process.env.NEXT_PUBLIC_ZAKEKE_TENANT_ID || '',
+// 3DLOOK API configuration
+const API_CONFIG = {
+  apiKey: THREEDLOOK_CONFIG.apiKey,
+  baseUrl: THREEDLOOK_CONFIG.baseUrl,
 }
 
-// Types for Zakeke API
-export type ZakekeTryOnSession = {
+// Types for 3DLOOK API
+export type ThreeDLookTryOnSession = {
   sessionId: string
   status: 'created' | 'processing' | 'completed' | 'failed'
   productId: string
@@ -19,7 +19,7 @@ export type ZakekeTryOnSession = {
   expiresAt: string
 }
 
-export type ZakekeSizeRecommendation = {
+export type ThreeDLookSizeRecommendation = {
   recommendedSize: string
   confidence: number
   alternativeSizes: string[]
@@ -33,7 +33,7 @@ export type ZakekeSizeRecommendation = {
   }
 }
 
-export type ZakekeBodyMeasurements = {
+export type ThreeDLookBodyMeasurements = {
   height: number
   weight: number
   chest: number
@@ -45,44 +45,41 @@ export type ZakekeBodyMeasurements = {
   gender: 'male' | 'female' | 'other'
 }
 
-export type ZakekeTryOnRequest = {
+export type ThreeDLookTryOnRequest = {
   productId: string
   variantId: string
   userImage: string // base64 encoded image
-  measurements?: ZakekeBodyMeasurements
+  measurements?: ThreeDLookBodyMeasurements
 }
 
-export type ZakekeSizeRequest = {
+export type ThreeDLookSizeRequest = {
   productId: string
   variantId?: string
-  measurements: ZakekeBodyMeasurements
+  measurements: ThreeDLookBodyMeasurements
   preferences?: {
     fitStyle: 'slim' | 'regular' | 'loose'
     comfortLevel: 'tight' | 'comfortable' | 'loose'
   }
 }
 
-class ZakekeService {
+class ThreeDLookService {
   private apiKey: string
   private baseUrl: string
-  private tenantId: string
 
   constructor() {
-    this.apiKey = ZAKEKE_CONFIG.apiKey
-    this.baseUrl = ZAKEKE_CONFIG.baseUrl
-    this.tenantId = ZAKEKE_CONFIG.tenantId
+    this.apiKey = API_CONFIG.apiKey
+    this.baseUrl = API_CONFIG.baseUrl
   }
 
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
     if (!this.apiKey) {
-      throw new Error('Zakeke API key not configured')
+      throw new Error('3DLOOK API key not configured')
     }
 
     const url = `${this.baseUrl}${endpoint}`
     const headers = {
       'Authorization': `Bearer ${this.apiKey}`,
       'Content-Type': 'application/json',
-      'X-Tenant-ID': this.tenantId,
       ...options.headers,
     }
 
@@ -93,12 +90,12 @@ class ZakekeService {
       })
 
       if (!response.ok) {
-        throw new Error(`Zakeke API error: ${response.status} ${response.statusText}`)
+        throw new Error(`3DLOOK API error: ${response.status} ${response.statusText}`)
       }
 
       return await response.json()
     } catch (error) {
-      console.error('Zakeke API request failed:', error)
+      console.error('3DLOOK API request failed:', error)
       throw error
     }
   }
@@ -106,9 +103,9 @@ class ZakekeService {
   /**
    * Create a virtual try-on session
    */
-  async createTryOnSession(request: ZakekeTryOnRequest): Promise<ZakekeTryOnSession> {
+  async createTryOnSession(request: ThreeDLookTryOnRequest): Promise<ThreeDLookTryOnSession> {
     try {
-      const response = await this.makeRequest('/try-on/sessions', {
+      const response = await this.makeRequest(THREEDLOOK_CONFIG.endpoints.tryOn, {
         method: 'POST',
         body: JSON.stringify(request),
       })
@@ -123,9 +120,9 @@ class ZakekeService {
   /**
    * Get size recommendation based on body measurements
    */
-  async getSizeRecommendation(request: ZakekeSizeRequest): Promise<ZakekeSizeRecommendation> {
+  async getSizeRecommendation(request: ThreeDLookSizeRequest): Promise<ThreeDLookSizeRecommendation> {
     try {
-      const response = await this.makeRequest('/sizing/recommendations', {
+      const response = await this.makeRequest(THREEDLOOK_CONFIG.endpoints.sizing, {
         method: 'POST',
         body: JSON.stringify(request),
       })
@@ -142,7 +139,7 @@ class ZakekeService {
    */
   async processTryOn(sessionId: string, userImage: string): Promise<{ resultImage: string; confidence: number }> {
     try {
-      const response = await this.makeRequest(`/try-on/sessions/${sessionId}/process`, {
+      const response = await this.makeRequest(`${THREEDLOOK_CONFIG.endpoints.tryOn}/${sessionId}/process`, {
         method: 'POST',
         body: JSON.stringify({ userImage }),
       })
@@ -157,9 +154,9 @@ class ZakekeService {
   /**
    * Get try-on session status
    */
-  async getTryOnSessionStatus(sessionId: string): Promise<ZakekeTryOnSession> {
+  async getTryOnSessionStatus(sessionId: string): Promise<ThreeDLookTryOnSession> {
     try {
-      const response = await this.makeRequest(`/try-on/sessions/${sessionId}`)
+      const response = await this.makeRequest(`${THREEDLOOK_CONFIG.endpoints.tryOn}/${sessionId}`)
       return response
     } catch (error) {
       console.error('Failed to get try-on session status:', error)
@@ -170,9 +167,9 @@ class ZakekeService {
   /**
    * Extract body measurements from photo
    */
-  async extractMeasurements(imageData: string): Promise<ZakekeBodyMeasurements> {
+  async extractMeasurements(imageData: string): Promise<ThreeDLookBodyMeasurements> {
     try {
-      const response = await this.makeRequest('/measurements/extract', {
+      const response = await this.makeRequest(THREEDLOOK_CONFIG.endpoints.measurements, {
         method: 'POST',
         body: JSON.stringify({ image: imageData }),
       })
@@ -189,7 +186,7 @@ class ZakekeService {
    */
   async getProductSizeChart(productId: string): Promise<any> {
     try {
-      const response = await this.makeRequest(`/products/${productId}/size-chart`)
+      const response = await this.makeRequest(`${THREEDLOOK_CONFIG.endpoints.sizeChart}/${productId}/size-chart`)
       return response
     } catch (error) {
       console.error('Failed to get product size chart:', error)
@@ -202,17 +199,17 @@ class ZakekeService {
    */
   async checkServiceHealth(): Promise<boolean> {
     try {
-      await this.makeRequest('/health')
+      await this.makeRequest(THREEDLOOK_CONFIG.endpoints.health)
       return true
     } catch (error) {
-      console.error('Zakeke service health check failed:', error)
+      console.error('3DLOOK service health check failed:', error)
       return false
     }
   }
 }
 
 // Export singleton instance
-export const zakekeService = new ZakekeService()
+export const threeDLookService = new ThreeDLookService()
 
 // Export for direct usage
-export default ZakekeService
+export default ThreeDLookService

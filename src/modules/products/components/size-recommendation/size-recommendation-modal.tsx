@@ -7,30 +7,12 @@ import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import SizeChart from "./size-chart"
 import MeasurementForm from "./measurement-form"
+import { BodyMeasurements, SizeRecommendation } from "./types"
 
 type SizeRecommendationModalProps = {
   product: HttpTypes.StoreProduct
   variant?: HttpTypes.StoreProductVariant
   onClose: () => void
-}
-
-type BodyMeasurements = {
-  height: string
-  weight: string
-  chest: string
-  waist: string
-  hips: string
-  inseam: string
-  shoulders: string
-  age: string
-  gender: string
-}
-
-type SizeRecommendation = {
-  recommendedSize: string
-  confidence: number
-  alternativeSizes: string[]
-  fitNotes: string[]
 }
 
 const SizeRecommendationModal: React.FC<SizeRecommendationModalProps> = ({
@@ -68,8 +50,8 @@ const SizeRecommendationModal: React.FC<SizeRecommendationModalProps> = ({
 
     setIsProcessing(true)
     try {
-      // Import Zakeke service dynamically to avoid SSR issues
-      const { zakekeService } = await import("@lib/data/zakeke")
+      // Import 3DLOOK service dynamically to avoid SSR issues
+      const { threeDLookService } = await import("@lib/data/3dlook")
       
       // Convert string measurements to numbers
       const numericMeasurements = {
@@ -84,8 +66,8 @@ const SizeRecommendationModal: React.FC<SizeRecommendationModalProps> = ({
         gender: measurements.gender as 'male' | 'female' | 'other',
       }
       
-      // Get size recommendation from Zakeke
-      const zakekeRecommendation = await zakekeService.getSizeRecommendation({
+      // Get size recommendation from 3DLOOK
+      const threeDLookRecommendation = await threeDLookService.getSizeRecommendation({
         productId: product.id!,
         variantId: variant?.id,
         measurements: numericMeasurements,
@@ -93,10 +75,10 @@ const SizeRecommendationModal: React.FC<SizeRecommendationModalProps> = ({
       
       // Convert to our format
       const recommendation: SizeRecommendation = {
-        recommendedSize: zakekeRecommendation.recommendedSize,
-        confidence: zakekeRecommendation.confidence,
-        alternativeSizes: zakekeRecommendation.alternativeSizes,
-        fitNotes: zakekeRecommendation.fitNotes,
+        recommendedSize: threeDLookRecommendation.recommendedSize,
+        confidence: threeDLookRecommendation.confidence,
+        alternativeSizes: threeDLookRecommendation.alternativeSizes,
+        fitNotes: threeDLookRecommendation.fitNotes,
         measurements: measurements,
         productId: product.id!,
         variantId: variant?.id,

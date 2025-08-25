@@ -30,3 +30,4 @@ export type ProductOverlay = {
   rotation: number
   opacity: number
 }
+

@@ -1,0 +1,13 @@
+# 3DLOOK API Configuration
+# Copy these variables to your .env.local file and fill in your actual values
+
+# Your 3DLOOK API key
+NEXT_PUBLIC_3DLOOK_API_KEY=your_3dlook_api_key_here
+
+# 3DLOOK API base URL (update with actual URL from your 3DLOOK documentation)
+NEXT_PUBLIC_3DLOOK_API_URL=https://api.3dlook.com/v1
+
+# Optional: Customize API endpoints if different from defaults
+# NEXT_PUBLIC_3DLOOK_TRY_ON_ENDPOINT=/virtual-try-on
+# NEXT_PUBLIC_3DLOOK_SIZING_ENDPOINT=/size-recommendations
+# NEXT_PUBLIC_3DLOOK_MEASUREMENTS_ENDPOINT=/measurements/extract

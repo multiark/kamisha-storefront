@@ -25,7 +25,7 @@ const VirtualTryOnButton: React.FC<VirtualTryOnButtonProps> = ({
     
     setIsLoading(true)
     try {
-      // Initialize Zakeke try-on session
+      // Initialize 3DLOOK try-on session
       // This will be implemented in the next phase
       setIsModalOpen(true)
     } catch (error) {
@@ -62,3 +62,4 @@ const VirtualTryOnButton: React.FC<VirtualTryOnButtonProps> = ({
 }
 
 export default VirtualTryOnButton
+

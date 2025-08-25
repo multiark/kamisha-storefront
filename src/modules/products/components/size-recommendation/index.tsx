@@ -23,7 +23,7 @@ const SizeRecommendationButton: React.FC<SizeRecommendationButtonProps> = ({
   const handleSizeRecommendation = async () => {
     setIsLoading(true)
     try {
-      // Initialize Zakeke size recommendation
+      // Initialize 3DLOOK size recommendation
       // This will be implemented in the next phase
       setIsModalOpen(true)
     } catch (error) {
@@ -60,3 +60,4 @@ const SizeRecommendationButton: React.FC<SizeRecommendationButtonProps> = ({
 }
 
 export default SizeRecommendationButton
+

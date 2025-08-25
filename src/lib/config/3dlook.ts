@@ -1,9 +1,8 @@
-// Zakeke configuration
-export const ZAKEKE_CONFIG = {
+// 3DLOOK configuration
+export const THREEDLOOK_CONFIG = {
   // API Configuration
-  apiKey: process.env.NEXT_PUBLIC_ZAKEKE_API_KEY || '',
-  baseUrl: process.env.NEXT_PUBLIC_ZAKEKE_API_URL || 'https://api.zakeke.com/v2',
-  tenantId: process.env.NEXT_PUBLIC_ZAKEKE_TENANT_ID || '',
+  apiKey: process.env.NEXT_PUBLIC_3DLOOK_API_KEY || '',
+  baseUrl: process.env.NEXT_PUBLIC_3DLOOK_API_URL || 'https://api.3dlook.com/v1',
   
   // Feature flags
   features: {
@@ -21,10 +20,10 @@ export const ZAKEKE_CONFIG = {
     showSizeRecommendation: true,
   },
   
-  // API Endpoints
+  // API Endpoints - Update these with actual 3DLOOK endpoints
   endpoints: {
-    tryOn: '/try-on/sessions',
-    sizing: '/sizing/recommendations',
+    tryOn: '/virtual-try-on',
+    sizing: '/size-recommendations',
     measurements: '/measurements/extract',
     sizeChart: '/products',
     health: '/health',
@@ -40,19 +39,15 @@ export const ZAKEKE_CONFIG = {
 }
 
 // Validation function
-export const validateZakekeConfig = () => {
+export const validate3DLookConfig = () => {
   const errors: string[] = []
   
-  if (!ZAKEKE_CONFIG.apiKey) {
-    errors.push('Zakeke API key is required')
+  if (!THREEDLOOK_CONFIG.apiKey) {
+    errors.push('3DLOOK API key is required')
   }
   
-  if (!ZAKEKE_CONFIG.tenantId) {
-    errors.push('Zakeke tenant ID is required')
-  }
-  
-  if (!ZAKEKE_CONFIG.baseUrl) {
-    errors.push('Zakeke API base URL is required')
+  if (!THREEDLOOK_CONFIG.baseUrl) {
+    errors.push('3DLOOK API base URL is required')
   }
   
   return {
@@ -62,11 +57,11 @@ export const validateZakekeConfig = () => {
 }
 
 // Get configuration for specific feature
-export const getFeatureConfig = (feature: keyof typeof ZAKEKE_CONFIG.features) => {
-  return ZAKEKE_CONFIG.features[feature]
+export const getFeatureConfig = (feature: keyof typeof THREEDLOOK_CONFIG.features) => {
+  return THREEDLOOK_CONFIG.features[feature]
 }
 
 // Get UI configuration for specific component
-export const getUIConfig = (component: keyof typeof ZAKEKE_CONFIG.ui) => {
-  return ZAKEKE_CONFIG.ui[component]
+export const getUIConfig = (component: keyof typeof THREEDLOOK_CONFIG.ui) => {
+  return THREEDLOOK_CONFIG.ui[component]
 }
