@@ -2,59 +2,113 @@ import { Suspense } from "react"
 
 import { listRegions } from "@lib/data/regions"
 import { StoreRegion } from "@medusajs/types"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Logo from "@modules/layout/components/logo"
+import MainNavigation from "@modules/layout/components/navigation/main-navigation"
+import MobileNavigation from "@modules/layout/components/navigation/mobile-navigation"
+import SearchBar from "@modules/layout/components/navigation/search-bar"
+import UserActions from "@modules/layout/components/navigation/user-actions"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 export default async function Nav() {
   const regions = await listRegions().then((regions: StoreRegion[]) => regions)
 
   return (
     <div className="sticky top-0 inset-x-0 z-50 group">
-      <header className="relative h-16 mx-auto border-b duration-200 bg-white/70 backdrop-blur-sm border-ui-border-base">
-        <nav className="content-container txt-xsmall-plus text-ui-fg-subtle flex items-center justify-between w-full h-full text-small-regular">
-          <div className="flex-1 basis-0 h-full flex items-center">
-            <div className="h-full">
-              <SideMenu regions={regions} />
+      {/* Top Bar */}
+      <div className="bg-ui-bg-subtle border-b border-ui-border-base">
+        <div className="content-container flex items-center justify-between py-2 text-xs text-ui-fg-subtle">
+          <div className="flex items-center space-x-4">
+            <span>Free shipping on orders over $50</span>
+            <span>•</span>
+            <span>30-day return policy</span>
+          </div>
+          <div className="hidden small:flex items-center space-x-4">
+            <span>Customer Support</span>
+            <span>•</span>
+            <span>Track Order</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Header */}
+      <header className="relative bg-white border-b border-ui-border-base">
+        <div className="content-container">
+          <div className="flex items-center justify-between h-20">
+            {/* Left Section - Mobile Menu & Logo */}
+            <div className="flex items-center space-x-4">
+              <MobileNavigation />
+              <Logo variant="default" />
+            </div>
+
+            {/* Center Section - Main Navigation */}
+            <div className="hidden medium:flex items-center justify-center flex-1">
+              <MainNavigation />
+            </div>
+
+            {/* Right Section - Search, User Actions & Cart */}
+            <div className="flex items-center space-x-4">
+              <div className="hidden medium:block">
+                <SearchBar />
+              </div>
+              <div className="hidden small:block">
+                <UserActions />
+              </div>
+              <Suspense
+                fallback={
+                  <div className="w-8 h-8 bg-ui-bg-subtle rounded-full animate-pulse" />
+                }
+              >
+                <CartButton />
+              </Suspense>
             </div>
           </div>
+        </div>
+      </header>
 
-          <div className="flex items-center h-full">
-            <LocalizedClientLink
-              href="/"
-              className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
-              data-testid="nav-store-link"
-            >
-              Kamisha Online Store
-            </LocalizedClientLink>
-          </div>
-
-          <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
-            <div className="hidden small:flex items-center gap-x-6 h-full">
+      {/* Secondary Navigation - Categories */}
+      <div className="bg-ui-bg-subtle border-b border-ui-border-base">
+        <div className="content-container">
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center space-x-8 text-sm">
               <LocalizedClientLink
-                className="hover:text-ui-fg-base"
-                href="/account"
-                data-testid="nav-account-link"
+                href="/collections/new-arrivals"
+                className="text-ui-fg-base hover:text-ui-fg-interactive font-medium transition-colors"
               >
-                Account
+                New Arrivals
+              </LocalizedClientLink>
+              <LocalizedClientLink
+                href="/collections/abayas"
+                className="text-ui-fg-base hover:text-ui-fg-interactive font-medium transition-colors"
+              >
+                Abayas
+              </LocalizedClientLink>
+              <LocalizedClientLink
+                href="/collections/hijabs"
+                className="text-ui-fg-base hover:text-ui-fg-interactive font-medium transition-colors"
+              >
+                Hijabs
+              </LocalizedClientLink>
+              <LocalizedClientLink
+                href="/sale"
+                className="text-ui-fg-base hover:text-ui-fg-interactive font-medium transition-colors"
+              >
+                Sale
               </LocalizedClientLink>
             </div>
-            <Suspense
-              fallback={
-                <LocalizedClientLink
-                  className="hover:text-ui-fg-base flex gap-2"
-                  href="/cart"
-                  data-testid="nav-cart-link"
-                >
-                  Cart (0)
-                </LocalizedClientLink>
-              }
-            >
-              <CartButton />
-            </Suspense>
+            <div className="hidden medium:flex items-center space-x-4 text-sm">
+              <span className="text-ui-fg-subtle">Follow us:</span>
+              <a href="#" className="text-ui-fg-subtle hover:text-ui-fg-interactive transition-colors">
+                Instagram
+              </a>
+              <a href="#" className="text-ui-fg-subtle hover:text-ui-fg-interactive transition-colors">
+                Facebook
+              </a>
+            </div>
           </div>
-        </nav>
-      </header>
+        </div>
+      </div>
     </div>
   )
 }

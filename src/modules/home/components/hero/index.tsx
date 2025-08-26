@@ -186,7 +186,7 @@ const Hero = () => {
       </button>
 
       {/* Fallback for missing images */}
-      <div className="absolute inset-0 bg-gradient-to-br from-rose-600 to-purple-700 opacity-20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-purple-600 opacity-20 pointer-events-none" />
 
 
     </div>
