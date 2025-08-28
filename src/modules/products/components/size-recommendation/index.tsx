@@ -2,20 +2,23 @@
 
 import { Button } from "@medusajs/ui"
 import { Ruler } from "lucide-react"
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { HttpTypes } from "@medusajs/types"
 import SizeRecommendationModal from "./size-recommendation-modal"
+import { SizeRecommendation } from "./types"
 
 type SizeRecommendationButtonProps = {
   product: HttpTypes.StoreProduct
   variant?: HttpTypes.StoreProductVariant
   disabled?: boolean
+  onSizeSelected?: (size: string, recommendation: SizeRecommendation) => void
 }
 
 const SizeRecommendationButton: React.FC<SizeRecommendationButtonProps> = ({
   product,
   variant,
   disabled = false,
+  onSizeSelected,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -23,8 +26,8 @@ const SizeRecommendationButton: React.FC<SizeRecommendationButtonProps> = ({
   const handleSizeRecommendation = async () => {
     setIsLoading(true)
     try {
-      // Initialize 3DLOOK size recommendation
-      // This will be implemented in the next phase
+      // Simulate API call delay for mock implementation
+      await new Promise(resolve => setTimeout(resolve, 1000))
       setIsModalOpen(true)
     } catch (error) {
       console.error("Failed to get size recommendation:", error)
@@ -32,6 +35,13 @@ const SizeRecommendationButton: React.FC<SizeRecommendationButtonProps> = ({
       setIsLoading(false)
     }
   }
+
+  const handleSizeSelected = useCallback((size: string, recommendation: SizeRecommendation) => {
+    // Call the parent callback to handle the size selection
+    if (onSizeSelected) {
+      onSizeSelected(size, recommendation)
+    }
+  }, [onSizeSelected])
 
   const isDisabled = disabled || isLoading
 
@@ -53,6 +63,7 @@ const SizeRecommendationButton: React.FC<SizeRecommendationButtonProps> = ({
           product={product}
           variant={variant}
           onClose={() => setIsModalOpen(false)}
+          onSizeSelected={handleSizeSelected}
         />
       )}
     </>

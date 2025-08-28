@@ -1,39 +1,7 @@
-"use client"
+// Mock 3DLOOK service - Replace with real API integration when keys are available
+// This file demonstrates the expected API structure for size recommendations
 
-import { HttpTypes } from "@medusajs/types"
-import { THREEDLOOK_CONFIG } from "@lib/config/3dlook"
-
-// 3DLOOK API configuration
-const API_CONFIG = {
-  apiKey: THREEDLOOK_CONFIG.apiKey,
-  baseUrl: THREEDLOOK_CONFIG.baseUrl,
-}
-
-// Types for 3DLOOK API
-export type ThreeDLookTryOnSession = {
-  sessionId: string
-  status: 'created' | 'processing' | 'completed' | 'failed'
-  productId: string
-  variantId: string
-  createdAt: string
-  expiresAt: string
-}
-
-export type ThreeDLookSizeRecommendation = {
-  recommendedSize: string
-  confidence: number
-  alternativeSizes: string[]
-  fitNotes: string[]
-  measurements: {
-    chest: number
-    waist: number
-    hips: number
-    height: number
-    weight: number
-  }
-}
-
-export type ThreeDLookBodyMeasurements = {
+export interface ThreeDLookMeasurements {
   height: number
   weight: number
   chest: number
@@ -45,171 +13,111 @@ export type ThreeDLookBodyMeasurements = {
   gender: 'male' | 'female' | 'other'
 }
 
-export type ThreeDLookTryOnRequest = {
-  productId: string
-  variantId: string
-  userImage: string // base64 encoded image
-  measurements?: ThreeDLookBodyMeasurements
+export interface ThreeDLookSizeRecommendation {
+  recommendedSize: string
+  confidence: number
+  alternativeSizes: string[]
+  fitNotes: string[]
 }
 
-export type ThreeDLookSizeRequest = {
+export interface ThreeDLookRequest {
   productId: string
   variantId?: string
-  measurements: ThreeDLookBodyMeasurements
-  preferences?: {
-    fitStyle: 'slim' | 'regular' | 'loose'
-    comfortLevel: 'tight' | 'comfortable' | 'loose'
+  measurements: ThreeDLookMeasurements
+}
+
+// Mock service that simulates the real 3DLOOK API
+export const threeDLookService = {
+  async getSizeRecommendation(request: ThreeDLookRequest): Promise<ThreeDLookSizeRecommendation> {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    // Mock logic based on measurements
+    const { measurements } = request
+    const { height, weight, chest } = measurements
+    
+    let recommendedSize = "M"
+    let confidence = 85
+    
+    // Simple mock sizing logic (replace with real AI logic)
+    if (height > 180 && chest > 100) {
+      recommendedSize = "L"
+      confidence = 90
+    } else if (height < 165 && chest < 90) {
+      recommendedSize = "S"
+      confidence = 88
+    } else if (height > 175 && chest > 95) {
+      recommendedSize = "L"
+      confidence = 87
+    }
+    
+    const alternativeSizes = recommendedSize === "M" ? ["S", "L"] : 
+                           recommendedSize === "L" ? ["M", "XL"] : ["M", "L"]
+    
+    const fitNotes = [
+      "Based on your measurements, this size should provide a comfortable fit",
+      "Consider your preferred fit style (slim, regular, or loose)",
+      "If between sizes, we recommend sizing up for a more relaxed fit"
+    ]
+    
+    return {
+      recommendedSize,
+      confidence,
+      alternativeSizes,
+      fitNotes
+    }
+  },
+
+  // Future methods for virtual measurement
+  async startVirtualMeasurement(): Promise<{ sessionId: string }> {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    return { sessionId: 'mock-session-' + Date.now() }
+  },
+
+  async processVirtualMeasurement(sessionId: string): Promise<ThreeDLookMeasurements> {
+    await new Promise(resolve => setTimeout(resolve, 3000))
+    
+    // Mock virtual measurement results
+    return {
+      height: 175,
+      weight: 70,
+      chest: 95,
+      waist: 80,
+      hips: 95,
+      inseam: 80,
+      shoulders: 45,
+      age: 28,
+      gender: 'male'
+    }
   }
 }
 
-class ThreeDLookService {
+// Real API integration would look like this:
+/*
+export const threeDLookService = {
   private apiKey: string
   private baseUrl: string
 
   constructor() {
-    this.apiKey = API_CONFIG.apiKey
-    this.baseUrl = API_CONFIG.baseUrl
+    this.apiKey = process.env.THREEDLOOK_API_KEY!
+    this.baseUrl = process.env.THREEDLOOK_BASE_URL!
   }
 
-  private async makeRequest(endpoint: string, options: RequestInit = {}) {
-    if (!this.apiKey) {
-      throw new Error('3DLOOK API key not configured')
+  async getSizeRecommendation(request: ThreeDLookRequest): Promise<ThreeDLookSizeRecommendation> {
+    const response = await fetch(`${this.baseUrl}/size-recommendation`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(request)
+    })
+
+    if (!response.ok) {
+      throw new Error(`3DLOOK API error: ${response.statusText}`)
     }
 
-    const url = `${this.baseUrl}${endpoint}`
-    const headers = {
-      'Authorization': `Bearer ${this.apiKey}`,
-      'Content-Type': 'application/json',
-      ...options.headers,
-    }
-
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      })
-
-      if (!response.ok) {
-        throw new Error(`3DLOOK API error: ${response.status} ${response.statusText}`)
-      }
-
-      return await response.json()
-    } catch (error) {
-      console.error('3DLOOK API request failed:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Create a virtual try-on session
-   */
-  async createTryOnSession(request: ThreeDLookTryOnRequest): Promise<ThreeDLookTryOnSession> {
-    try {
-      const response = await this.makeRequest(THREEDLOOK_CONFIG.endpoints.tryOn, {
-        method: 'POST',
-        body: JSON.stringify(request),
-      })
-
-      return response
-    } catch (error) {
-      console.error('Failed to create try-on session:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get size recommendation based on body measurements
-   */
-  async getSizeRecommendation(request: ThreeDLookSizeRequest): Promise<ThreeDLookSizeRecommendation> {
-    try {
-      const response = await this.makeRequest(THREEDLOOK_CONFIG.endpoints.sizing, {
-        method: 'POST',
-        body: JSON.stringify(request),
-      })
-
-      return response
-    } catch (error) {
-      console.error('Failed to get size recommendation:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Process virtual try-on with user image
-   */
-  async processTryOn(sessionId: string, userImage: string): Promise<{ resultImage: string; confidence: number }> {
-    try {
-      const response = await this.makeRequest(`${THREEDLOOK_CONFIG.endpoints.tryOn}/${sessionId}/process`, {
-        method: 'POST',
-        body: JSON.stringify({ userImage }),
-      })
-
-      return response
-    } catch (error) {
-      console.error('Failed to process try-on:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get try-on session status
-   */
-  async getTryOnSessionStatus(sessionId: string): Promise<ThreeDLookTryOnSession> {
-    try {
-      const response = await this.makeRequest(`${THREEDLOOK_CONFIG.endpoints.tryOn}/${sessionId}`)
-      return response
-    } catch (error) {
-      console.error('Failed to get try-on session status:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Extract body measurements from photo
-   */
-  async extractMeasurements(imageData: string): Promise<ThreeDLookBodyMeasurements> {
-    try {
-      const response = await this.makeRequest(THREEDLOOK_CONFIG.endpoints.measurements, {
-        method: 'POST',
-        body: JSON.stringify({ image: imageData }),
-      })
-
-      return response.measurements
-    } catch (error) {
-      console.error('Failed to extract measurements:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get product size chart
-   */
-  async getProductSizeChart(productId: string): Promise<any> {
-    try {
-      const response = await this.makeRequest(`${THREEDLOOK_CONFIG.endpoints.sizeChart}/${productId}/size-chart`)
-      return response
-    } catch (error) {
-      console.error('Failed to get product size chart:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Check if service is available
-   */
-  async checkServiceHealth(): Promise<boolean> {
-    try {
-      await this.makeRequest(THREEDLOOK_CONFIG.endpoints.health)
-      return true
-    } catch (error) {
-      console.error('3DLOOK service health check failed:', error)
-      return false
-    }
+    return response.json()
   }
 }
-
-// Export singleton instance
-export const threeDLookService = new ThreeDLookService()
-
-// Export for direct usage
-export default ThreeDLookService
+*/

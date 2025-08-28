@@ -13,7 +13,8 @@ import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
 import VirtualTryOnButton from "../virtual-try-on"
 import SizeRecommendationButton from "../size-recommendation"
-import GetMeasuredButton from "../get-measured";
+import GetMeasuredButton from "../get-measured"
+import { SizeRecommendation } from "../size-recommendation/types"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -36,6 +37,8 @@ export default function ProductActions({
 }: ProductActionsProps) {
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [recommendedSize, setRecommendedSize] = useState<string | null>(null)
+  const [sizeRecommendation, setSizeRecommendation] = useState<SizeRecommendation | null>(null)
   const countryCode = useParams().countryCode as string
 
   // If there is only 1 variant, preselect the options
@@ -51,11 +54,26 @@ export default function ProductActions({
       return
     }
 
+    // If we have a recommended size, try to find a variant that matches
+    if (recommendedSize) {
+      const recommendedVariant = product.variants.find((v) => {
+        const variantOptions = optionsAsKeymap(v.options)
+        // Check if any option matches the recommended size
+        return variantOptions && Object.values(variantOptions).some(value => 
+          value?.toLowerCase().includes(recommendedSize.toLowerCase())
+        )
+      })
+      if (recommendedVariant) {
+        return recommendedVariant
+      }
+    }
+
+    // Fall back to original logic
     return product.variants.find((v) => {
       const variantOptions = optionsAsKeymap(v.options)
       return isEqual(variantOptions, options)
     })
-  }, [product.variants, options])
+  }, [product.variants, options, recommendedSize])
 
   // update the options when a variant is selected
   const setOptionValue = (optionId: string, value: string) => {
@@ -63,6 +81,9 @@ export default function ProductActions({
       ...prev,
       [optionId]: value,
     }))
+    // Clear recommended size when user manually selects options
+    setRecommendedSize(null)
+    setSizeRecommendation(null)
   }
 
   //check if the selected options produce a valid variant
@@ -116,6 +137,45 @@ export default function ProductActions({
     setIsAdding(false)
   }
 
+  // Handle size recommendation selection
+  const handleSizeSelected = (size: string, recommendation: SizeRecommendation) => {
+    setRecommendedSize(size)
+    setSizeRecommendation(recommendation)
+    
+    // Try to find a variant that matches the recommended size
+    if (product.variants) {
+      const matchingVariant = product.variants.find((v) => {
+        const variantOptions = optionsAsKeymap(v.options)
+        return variantOptions && Object.values(variantOptions).some(value => 
+          value?.toLowerCase().includes(size.toLowerCase())
+        )
+      })
+      
+      if (matchingVariant) {
+        // Update options to match the recommended size variant
+        const variantOptions = optionsAsKeymap(matchingVariant.options)
+        setOptions(variantOptions ?? {})
+      }
+    }
+  }
+
+  // Get button text based on state
+  const getButtonText = () => {
+    if (!selectedVariant && !options) {
+      return "Select variant"
+    }
+    
+    if (sizeRecommendation) {
+      return `Add Size ${recommendedSize} to Cart`
+    }
+    
+    if (!inStock || !isValidVariant) {
+      return "Out of stock"
+    }
+    
+    return "Add to cart"
+  }
+
   return (
     <>
       <div className="flex flex-col gap-y-2" ref={actionsRef}>
@@ -150,10 +210,37 @@ export default function ProductActions({
               product={product}
               variant={selectedVariant}
               disabled={disabled}
+              onSizeSelected={handleSizeSelected}
             />
-            <GetMeasuredButton />
+            {/* <GetMeasuredButton /> */}
           </div>
         </div>
+
+        {/* Show size recommendation info if available */}
+        {sizeRecommendation && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-medium text-blue-800">
+                  Recommended Size: {recommendedSize}
+                </h4>
+                <p className="text-sm text-blue-700">
+                  {sizeRecommendation.confidence}% confidence based on your measurements
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  setRecommendedSize(null)
+                  setSizeRecommendation(null)
+                }}
+                variant="secondary"
+                size="base"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        )}
 
         <ProductPrice product={product} variant={selectedVariant} />
 
@@ -171,11 +258,7 @@ export default function ProductActions({
           isLoading={isAdding}
           data-testid="add-product-button"
         >
-          {!selectedVariant && !options
-            ? "Select variant"
-            : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
+          {isAdding ? 'Adding...' : getButtonText()}
         </Button>
         <MobileActions
           product={product}

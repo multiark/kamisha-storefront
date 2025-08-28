@@ -1,127 +1,173 @@
 "use client"
 
-import { HttpTypes } from "@medusajs/types"
 import { useState } from "react"
+import { HttpTypes } from "@medusajs/types"
+import { SizeChartData, MeasurementUnit } from "./types"
+import { Button } from "@medusajs/ui"
+import { Ruler, Globe } from "lucide-react"
 
 type SizeChartProps = {
   product: HttpTypes.StoreProduct
 }
 
-type SizeChartData = {
-  size: string
-  chest: string
-  waist: string
-  hips: string
-  length: string
-  shoulders: string
-  sleeves: string
-}
+// Mock size chart data
+const mockSizeChartData: SizeChartData[] = [
+  {
+    size: "XS",
+    chest: "32-34",
+    waist: "26-28",
+    hips: "34-36",
+    length: "26-27",
+    shoulders: "14-15",
+    sleeves: "23-24"
+  },
+  {
+    size: "S",
+    chest: "34-36",
+    waist: "28-30",
+    hips: "36-38",
+    length: "27-28",
+    shoulders: "15-16",
+    sleeves: "24-25"
+  },
+  {
+    size: "M",
+    chest: "36-38",
+    waist: "30-32",
+    hips: "38-40",
+    length: "28-29",
+    shoulders: "16-17",
+    sleeves: "25-26"
+  },
+  {
+    size: "L",
+    chest: "38-40",
+    waist: "32-34",
+    hips: "40-42",
+    length: "29-30",
+    shoulders: "17-18",
+    sleeves: "26-27"
+  },
+  {
+    size: "XL",
+    chest: "40-42",
+    waist: "34-36",
+    hips: "42-44",
+    length: "30-31",
+    shoulders: "18-19",
+    sleeves: "27-28"
+  },
+  {
+    size: "XXL",
+    chest: "42-44",
+    waist: "36-38",
+    hips: "44-46",
+    length: "31-32",
+    shoulders: "19-20",
+    sleeves: "28-29"
+  }
+]
 
 const SizeChart: React.FC<SizeChartProps> = ({ product }) => {
-  const [unit, setUnit] = useState<'metric' | 'imperial'>('metric')
-  
-      // Mock size chart data - in real implementation, this would come from 3DLOOK API
-  const sizeChartData: SizeChartData[] = [
-    { size: 'XS', chest: '86-91', waist: '71-76', hips: '91-96', length: '66', shoulders: '41', sleeves: '58' },
-    { size: 'S', chest: '91-96', waist: '76-81', hips: '96-101', length: '68', shoulders: '43', sleeves: '60' },
-    { size: 'M', chest: '96-101', waist: '81-86', hips: '101-106', length: '70', shoulders: '45', sleeves: '62' },
-    { size: 'L', chest: '101-106', waist: '86-91', hips: '106-111', length: '72', shoulders: '47', sleeves: '64' },
-    { size: 'XL', chest: '106-111', waist: '91-96', hips: '111-116', length: '74', shoulders: '49', sleeves: '66' },
-    { size: 'XXL', chest: '111-116', waist: '96-101', hips: '116-121', length: '76', shoulders: '51', sleeves: '68' },
-  ]
+  const [unit, setUnit] = useState<MeasurementUnit>('metric')
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
 
-  const imperialSizeChartData: SizeChartData[] = [
-    { size: 'XS', chest: '34-36', waist: '28-30', hips: '36-38', length: '26', shoulders: '16', sleeves: '23' },
-    { size: 'S', chest: '36-38', waist: '30-32', hips: '38-40', length: '27', shoulders: '17', sleeves: '24' },
-    { size: 'M', chest: '38-40', waist: '32-34', hips: '40-42', length: '28', shoulders: '18', sleeves: '25' },
-    { size: 'L', chest: '40-42', waist: '34-36', hips: '42-44', length: '29', shoulders: '19', sleeves: '26' },
-    { size: 'XL', chest: '42-44', waist: '36-38', hips: '44-46', length: '30', shoulders: '20', sleeves: '27' },
-    { size: 'XXL', chest: '44-46', waist: '38-40', hips: '46-48', length: '31', shoulders: '21', sleeves: '28' },
-  ]
+  const toggleUnit = () => {
+    setUnit(unit === 'metric' ? 'imperial' : 'metric')
+  }
 
-  const currentData = unit === 'metric' ? sizeChartData : imperialSizeChartData
-  const unitLabel = unit === 'metric' ? 'cm' : 'inches'
+  const convertMeasurement = (metricValue: string): string => {
+    if (unit === 'metric') return metricValue
+    
+    // Simple conversion for demo (in real app, use proper conversion)
+    const [min, max] = metricValue.split('-').map(v => parseFloat(v))
+    if (isNaN(min) || isNaN(max)) return metricValue
+    
+    const minInch = Math.round(min * 0.393701)
+    const maxInch = Math.round(max * 0.393701)
+    return `${minInch}-${maxInch}`
+  }
+
+  const getUnitLabel = () => unit === 'metric' ? 'cm' : 'inches'
 
   return (
     <div className="space-y-6">
-      {/* Unit Toggle */}
-      <div className="flex items-center justify-center space-x-4">
-        <span className="text-sm font-medium text-gray-700">Units:</span>
-        <div className="flex bg-gray-100 rounded-lg p-1">
-          <button
-            onClick={() => setUnit('metric')}
-            className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-              unit === 'metric'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Metric (cm)
-          </button>
-          <button
-            onClick={() => setUnit('imperial')}
-            className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-              unit === 'imperial'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Imperial (inches)
-          </button>
+      {/* Header with unit toggle */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="text-lg font-medium text-gray-900 mb-1">Size Chart</h4>
+          <p className="text-sm text-gray-600">
+            Find your perfect fit using the measurements below
+          </p>
         </div>
+        <Button
+          onClick={toggleUnit}
+          variant="secondary"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <Globe className="w-4 h-4" />
+          {unit === 'metric' ? 'Metric (cm)' : 'Imperial (inches)'}
+        </Button>
       </div>
 
       {/* Size Chart Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Size
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Chest ({unitLabel})
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Chest
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Waist ({unitLabel})
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Waist
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Hips ({unitLabel})
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Hips
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Length ({unitLabel})
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Length
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Shoulders ({unitLabel})
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Shoulders
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
-                Sleeves ({unitLabel})
+              <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Sleeves
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {currentData.map((row, index) => (
-              <tr key={row.size} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {row.size}
+          <tbody className="bg-white divide-y divide-gray-200">
+            {mockSizeChartData.map((sizeData) => (
+              <tr
+                key={sizeData.size}
+                className={`hover:bg-gray-50 cursor-pointer ${
+                  selectedSize === sizeData.size ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                }`}
+                onClick={() => setSelectedSize(selectedSize === sizeData.size ? null : sizeData.size)}
+              >
+                <td className="px-3 py-4 whitespace-nowrap">
+                  <span className="text-sm font-medium text-gray-900">{sizeData.size}</span>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {row.chest}
+                <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {convertMeasurement(sizeData.chest)} {getUnitLabel()}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {row.waist}
+                <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {convertMeasurement(sizeData.waist)} {getUnitLabel()}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {row.hips}
+                <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {convertMeasurement(sizeData.hips)} {getUnitLabel()}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {row.length}
+                <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {convertMeasurement(sizeData.length)} {getUnitLabel()}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {row.shoulders}
+                <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {convertMeasurement(sizeData.shoulders)} {getUnitLabel()}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                  {row.sleeves}
+                <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {convertMeasurement(sizeData.sleeves)} {getUnitLabel()}
                 </td>
               </tr>
             ))}
@@ -129,97 +175,44 @@ const SizeChart: React.FC<SizeChartProps> = ({ product }) => {
         </table>
       </div>
 
-      {/* How to Measure Instructions */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h4 className="text-lg font-medium text-blue-800 mb-4">
-          How to Measure Yourself
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
-                <span className="text-blue-600 font-medium text-sm">1</span>
-              </div>
-              <div>
-                <h5 className="font-medium text-blue-800">Chest</h5>
-                <p className="text-sm text-blue-700">
-                  Measure around the fullest part of your chest, keeping the tape horizontal
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
-                <span className="text-blue-600 font-medium text-sm">2</span>
-              </div>
-              <div>
-                <h5 className="font-medium text-blue-800">Waist</h5>
-                <p className="text-sm text-blue-700">
-                  Measure around your natural waistline, keeping the tape comfortably loose
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
-                <span className="text-blue-600 font-medium text-sm">3</span>
-              </div>
-              <div>
-                <h5 className="font-medium text-blue-800">Hips</h5>
-                <p className="text-sm text-blue-700">
-                  Measure around the fullest part of your hips, keeping the tape horizontal
-                </p>
-              </div>
-            </div>
+      {/* How to Measure Guide */}
+      <div className="bg-gray-50 rounded-lg p-4">
+        <h5 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+          <Ruler className="w-4 h-4" />
+          How to Measure
+        </h5>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+          <div>
+            <h6 className="font-medium text-gray-800 mb-2">Upper Body</h6>
+            <ul className="space-y-1">
+              <li>• <strong>Chest:</strong> Around the fullest part</li>
+              <li>• <strong>Shoulders:</strong> Across the back</li>
+              <li>• <strong>Sleeves:</strong> From shoulder to wrist</li>
+            </ul>
           </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
-                <span className="text-blue-600 font-medium text-sm">4</span>
-              </div>
-              <div>
-                <h5 className="font-medium text-blue-800">Shoulders</h5>
-                <p className="text-sm text-blue-700">
-                  Measure across the back from shoulder tip to shoulder tip
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
-                <span className="text-blue-600 font-medium text-sm">5</span>
-              </div>
-              <div>
-                <h5 className="font-medium text-blue-800">Length</h5>
-                <p className="text-sm text-blue-700">
-                  Measure from the base of your neck to your desired length
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
-                <span className="text-blue-600 font-medium text-sm">6</span>
-              </div>
-              <div>
-                <h5 className="font-medium text-blue-800">Sleeves</h5>
-                <p className="text-sm text-blue-700">
-                  Measure from shoulder tip to your desired sleeve length
-                </p>
-              </div>
-            </div>
+          <div>
+            <h6 className="font-medium text-gray-800 mb-2">Lower Body</h6>
+            <ul className="space-y-1">
+              <li>• <strong>Waist:</strong> At the narrowest point</li>
+              <li>• <strong>Hips:</strong> Around the fullest part</li>
+              <li>• <strong>Length:</strong> From waist to desired length</li>
+            </ul>
           </div>
-        </div>
-        
-        <div className="mt-6 p-4 bg-blue-100 rounded-lg">
-          <p className="text-sm text-blue-800">
-            <strong>Pro Tip:</strong> For the most accurate measurements, have someone help you measure, 
-            and ensure the measuring tape is snug but not tight. Wear form-fitting clothing when measuring.
-          </p>
         </div>
       </div>
+
+      {/* Size Selection Help */}
+      {selectedSize && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h5 className="font-medium text-blue-800 mb-2">
+            Size {selectedSize} Selected
+          </h5>
+          <p className="text-sm text-blue-700">
+            This size should provide a comfortable fit based on the measurements shown above. 
+            If you're between sizes, we recommend sizing up for a more relaxed fit.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
